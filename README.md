@@ -1,4 +1,6 @@
-# Домашнее задание к занятию "`Что такое DevOps. CI/CD`" - `Островский Евгений`
+# Домашнее задание к занятию 
+# "`Уязвимости и атаки на информационные системы`"
+# `Брюханов Александр`
 
 
 ### Инструкция по выполнению домашнего задания
@@ -24,41 +26,74 @@
 
 ### Задание 1
 
-`Приведите ответ в свободной форме........`
+Скачайте и установите виртуальную машину Metasploitable: https://sourceforge.net/projects/metasploitable/.
 
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen1.1.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen1.2.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen1.3.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen1.4.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen1.5.png)
+Это типовая ОС для экспериментов в области информационной безопасности, с которой следует начать при анализе уязвимостей.
 
----
+Просканируйте эту виртуальную машину, используя **nmap**.
+
+Попробуйте найти уязвимости, которым подвержена эта виртуальная машина.
+
+Сами уязвимости можно поискать на сайте https://www.exploit-db.com/.
+
+Для этого нужно в поиске ввести название сетевой службы, обнаруженной на атакуемой машине, и выбрать подходящие по версии уязвимости.
+
+Ответьте на следующие вопросы:
+
+- Какие сетевые службы в ней разрешены?
+```
+nmap -sv -O 192.168.0.11
+```
+977 портов закрыты - 23 открыты
+
+**Службы** - ftp, ssh, telnet, smtp, domain, http, rpcbind, netbios-ssn, exec, login, tcpwrapped, java-rmi, bindshell, nfs, ftp, mysql, postgresql, vnc, X11, irc, ajp13, http
+
+![1.png](https://github.com/joos-net/attacks-on-is/blob/main/1.png)
+  
+- Какие уязвимости были вами обнаружены? (список со ссылками: достаточно трёх уязвимостей)
+```
+https://www.exploit-db.com/exploits/17491
+https://www.exploit-db.com/exploits/6122
+https://www.exploit-db.com/exploits/30020
+https://www.exploit-db.com/exploits/27407
+https://www.exploit-db.com/exploits/31965
+```
 
 ### Задание 2
 
-`Приведите ответ в свободной форме........`
+Проведите сканирование Metasploitable в режимах SYN, FIN, Xmas, UDP.
 
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen2.1.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen2.2.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen2.3.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen2.4.png)
+Запишите сеансы сканирования в Wireshark.
 
+Ответьте на следующие вопросы:
 
----
+- Чем отличаются эти режимы сканирования с точки зрения сетевого трафика?
+- Как отвечает сервер?
 
-### Задание 3
+**SYN** - Nmap посылает SYN-пакет, как бы намереваясь открыть настоящее соединение, и ожидает ответ. Наличие флагов SYN|ACK в ответе указывает на то, что порт удаленной машины открыт и прослушивается. Флаг RST в ответе означает обратное. Если Nmap принял пакет SYN|ACK, то в ответ немедленно отправляет RST-пакет для сброса еще не установленного соединения
+```
+nmap -sS <ip> - TCP SYN сканирование. SYN это используемый по умолчанию и наиболее популярный тип сканирования. 
+```
 
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen3-1.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen3-4.png)
+![SYN.png](https://github.com/joos-net/attacks-on-is/blob/main/SYN.png)
 
----
-## Дополнительные задания (со звездочкой*)
+**FIN** - Nmap посылает FIN-пакет, в TCP заголовок ставится флаг FIN. Согласно RFC 793, на прибывший FIN-пакет на закрытый порт сервер должен ответить пакетом RST. FIN-пакеты на открытые порты должны игнорироваться сервером. По этому различию становится возможным отличить закрытый порт от открытого. 
+```
+nmap -sF <ip> - FIN сканирование. Устанавливается только TCP FIN бит.
+```
 
-Эти задания дополнительные (не обязательные к выполнению) и никак не повлияют на получение вами зачета по этому домашнему заданию. Вы можете их выполнить, если хотите глубже и/или шире разобраться в материале.
+![FIN.png](https://github.com/joos-net/attacks-on-is/blob/main/FIN1.png)
 
-### Задание 4
+**Xmas** - Устанавливаются FIN, PSH и URG флаги. Если в результате FIN-сканирования мы получили список открытых портов, то это не Windows. Если же все эти методы выдали результат, что все порты закрыты, а SYN-сканирование обнаружило открытые порты, то мы скорей всего имеете дело с ОС Windows, Cisco, BSDI, IRIX, HP/UX и MVS. Все эти ОС не отправляют RST-пакеты.
+```
+nmap -sX <ip> - Xmas сканирование. Устанавливаются FIN, PSH и URG флаги.
+```
 
-`Приведите ответ в свободной форме........`
+![Xmas.png](https://github.com/joos-net/attacks-on-is/blob/main/Xmas.jpg)
 
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen3-1.png)
-![alt text](https://github.com/joos-net/jenkins/blob/main/jen3-4.png)
+**UDP** - На каждый порт сканируемой машины отправляется UDP-пакет без данных. Этот метод используется для определения, какие UDP-порты на сканируемом хосте являются открытыми.Если в ответ было получено ICMP-сообщение "порт недоступен", это означает, что порт закрыт. В противном случае предполагается, что сканируемый порт открыт.
+```
+nmap -sU <ip> - Различные типы UDP сканирования. Большой проблемой при UDP сканировании является его медленная скорость работы.
+```
+
+![UDP.png](https://github.com/joos-net/attacks-on-is/blob/main/udp.png)
